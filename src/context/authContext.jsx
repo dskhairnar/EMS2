@@ -12,40 +12,35 @@ const AuthProvider = ({ children }) => {
       try {
         const token = localStorage.getItem("token");
         if (token) {
-          // Verify the token with the server
-          const response = await axios.get(
-            "https://ems-rnvg.onrender.com/api/auth/verify",
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+          const response = await axios.get("http://localhost:5000/api/auth/verify", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
           if (response.data.success) {
-            setUser(response.data.user); // Set the logged-in user
+            setUser(response.data.user);
           } else {
-            setUser(null); // Token invalid, clear user
+            setUser(null);
           }
         }
       } catch (error) {
-        setUser(null); // Error handling
+        setUser(null);
       } finally {
-        setLoading(false); // Stop the loading state
+        setLoading(false);
       }
     };
 
     verifyUser();
-  }, []); // Run on component mount
+  }, []);
 
-  const login = (newUser, token) => {
+  const login = (newUser) => {
     setUser(newUser);
-    localStorage.setItem("token", token); // Store the token in localStorage
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("token"); // Clear the token from localStorage
+    localStorage.removeItem("token");
   };
 
   return (

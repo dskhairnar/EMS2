@@ -1,39 +1,46 @@
-import React, { useEffect, useState } from 'react'; 
-import { Link } from 'react-router-dom';
-import DataTable from 'react-data-table-component';
-import { columns, DepartmentButtons } from '../../utils/DepartmentHelpers';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";  // Use `useNavigate`
+import DataTable from "react-data-table-component";
+import { DepartmentButtons } from "../../utils/DepartmentHelpers";
+import axios from "axios";
 
 const DepartmentList = () => {
   const [departments, setDepartments] = useState([]);
-  const [depLoading, setDepLoading] = useState(false); // State for loading
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // Correctly use `useNavigate` hook
 
   useEffect(() => {
     const fetchDepartments = async () => {
-      setDepLoading(true); // Correctly set loading state
+      setError(null);
+      setLoading(true);
       try {
-        const response = await axios.get('https://ems-rnvg.onrender.com/api/department', {
-          headers: {
-            "Authorization": `Bearer ${localStorage.getItem('token')}`
+        const response = await axios.get(
+          "http://localhost:5000/api/department",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           }
-        });
+        );
+
         if (response.data.success) {
           let sno = 1;
           const data = response.data.departments.map((dep) => ({
             _id: dep._id,
-            sno: sno++, // Fixed typo here from 'snp' to 'sno'
+            sno: sno++,
             dep_name: dep.dep_name,
-            action: <DepartmentButtons id={dep._id} /> // Pass the department ID to the buttons if needed
+            action: <DepartmentButtons ID={dep._id} />,
           }));
           setDepartments(data);
+        } else {
+          setError("Failed to load departments. Please try again.");
         }
       } catch (error) {
-        console.error("Error fetching departments:", error); // Log the error for debugging
-        if (error.response && !error.response.data.success) {
-          alert(error.response.data.error);
-        }
+        console.error("Error fetching departments:", error);
+        setError(error.response?.data.error || "An unexpected error occurred.");
       } finally {
-        setDepLoading(false); // Set loading state to false in finally block
+        setLoading(false);
       }
     };
 
@@ -42,9 +49,13 @@ const DepartmentList = () => {
 
   return (
     <div className="p-5 bg-gradient-to-b from-purple-500 to-red-500 min-h-screen">
-      {depLoading ? (
+      {loading ? (
         <div className="flex justify-center items-center min-h-screen">
           <div className="text-white text-2xl">Loading...</div>
+        </div>
+      ) : error ? (
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="text-red-500 text-2xl">{error}</div>
         </div>
       ) : (
         <>
@@ -68,57 +79,62 @@ const DepartmentList = () => {
             <DataTable
               columns={[
                 {
-                  name: 'S.No',
-                  selector: row => row.sno,
+                  name: "S.No",
+                  selector: (row) => row.sno,
                   sortable: true,
-                  width: '60px', // Width for serial number column
+                  width: "60px", // Width for serial number column
                 },
                 {
-                  name: 'Department Name',
-                  selector: row => row.dep_name,
+                  name: "Department Name",
+                  selector: (row) => row.dep_name,
                   sortable: true,
-                  cell: row => <div className="text-left">{row.dep_name}</div>, // Align text to the left
-                  width: 'calc(100% - 200px)', // Calculate remaining space for the buttons
+                  cell: (row) => (
+                    <div className="text-left">{row.dep_name}</div>
+                  ), // Align text to the left
+                  width: "calc(100% - 200px)", // Calculate remaining space for the buttons
                 },
                 {
-                  name: 'Action',
-                  selector: row => row.action,
+                  name: "Action",
+                  selector: (row) => row.action,
                   button: true,
-                  width: '140px', // Adjust width for action buttons
+                  width: "140px",
                 },
               ]}
               data={departments}
               pagination // Enable pagination if necessary
-              noDataComponent={<div className="text-center text-gray-500">No departments available</div>}
+              noDataComponent={
+                <div className="text-center text-gray-500">
+                  No departments available
+                </div>
+              }
               highlightOnHover
               pointerOnHover
               customStyles={{
                 table: {
                   style: {
-                    borderRadius: '8px',
-                    width: '100%', // Ensure the table takes full width
+                    borderRadius: "8px",
+                    width: "100%",
                   },
                 },
                 headRow: {
                   style: {
-                    backgroundColor: '#f3f4f6',
-                    borderBottomColor: '#e5e7eb',
-                    borderBottomWidth: '2px',
-                    minHeight: '56px',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
+                    backgroundColor: "#f3f4f6",
+                    borderBottomColor: "#e5e7eb",
+                    borderBottomWidth: "2px",
+                    minHeight: "56px",
+                    fontSize: "16px",
+                    fontWeight: "bold",
                   },
                 },
                 rows: {
                   style: {
-                    minHeight: '48px', // override the row height
-                    '&:nth-child(odd)': {
-                      backgroundColor: '#f9fafb',
+                    minHeight: "48px",
+                    "&:nth-child(odd)": {
+                      backgroundColor: "#f9fafb",
                     },
                   },
                 },
               }}
-              // Additional styles for responsiveness
               responsive={true}
             />
           </div>

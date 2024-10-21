@@ -8,6 +8,7 @@ import RoleBaseRoutes from "./utils/RoleBaseRoutes";
 import AdminSummary from "./components/dashboard/AdminSummary";
 import DepartmentList from "./components/department/DepartmentList";
 import AddDepartment from "./components/department/AddDepartment";
+import EditDepartment from "./components/department/EditDepartment";
 
 function App() {
   return (
@@ -33,7 +34,11 @@ function App() {
           <Route
             path="/admin-dashboard/add-department"
             element={<AddDepartment />}/>
+             <Route
+            path="/admin-dashboard/department/:id"
+            element={<EditDepartment />}/>
         </Route>
+        
         
         <Route
           path="/employee-dashboard"

@@ -8,7 +8,7 @@ const AddDepartment = () => {
     description: "",
   });
 
-  const navigate = useNavigate(); // Ensure you call useNavigate as a function
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,7 +19,7 @@ const AddDepartment = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "https://ems-rnvg.onrender.com/api/department/add",
+        "http://localhost:5000/api/department/add",
         department,
         {
           headers: {
@@ -27,8 +27,8 @@ const AddDepartment = () => {
           },
         }
       );
+      console.log(response.data);
       if (response.data.success) {
-        // Update the navigation path
         navigate("/admin-dashboard/departments");
       }
     } catch (error) {
