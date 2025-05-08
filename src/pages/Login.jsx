@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
@@ -7,7 +7,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -17,19 +17,24 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", { email, password });
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        { email, password }
+      );
       console.log(response.data);
       if (response.data.success) {
-        login(response.data.user);
+        login(response.data.employee);
         localStorage.setItem("token", response.data.token);
-        if (response.data.user.role === "admin") {
-          navigate('/admin-dashboard');
+        if (response.data.employee.role === "admin") {
+          navigate("/admin-dashboard");
         } else {
-          navigate('/employee-dashboard');
+          navigate("/employee-dashboard");
         }
       }
     } catch (error) {
-      setError(error.response ? error.response.data.error : "Login failed. Please try again.");
+      setError(
+        error.response?.data?.message || "Login failed. Please try again."
+      );
       console.error(error);
     } finally {
       setLoading(false);
@@ -51,9 +56,16 @@ const Login = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email</label>
+            <label
+              htmlFor="email"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              Email
+            </label>
             <input
               type="email"
+              id="email"
+              value={email}
               placeholder="Enter Email"
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
@@ -62,9 +74,16 @@ const Login = () => {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="password" className="block text-gray-700 font-medium mb-2">Password</label>
+            <label
+              htmlFor="password"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              Password
+            </label>
             <input
               type="password"
+              id="password"
+              value={password}
               placeholder="**********"
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
@@ -74,10 +93,15 @@ const Login = () => {
 
           <div className="flex justify-between items-center mb-6">
             <label className="flex items-center text-gray-600">
-              <input type="checkbox" className="form-checkbox text-purple-600 border-gray-300 rounded focus:ring-purple-500" />
+              <input
+                type="checkbox"
+                className="form-checkbox text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+              />
               <span className="ml-2">Remember me</span>
             </label>
-            <a href="#" className="text-sm text-purple-600 hover:underline">Forgot password?</a>
+            <a href="#" className="text-sm text-purple-600 hover:underline">
+              Forgot password?
+            </a>
           </div>
 
           <button

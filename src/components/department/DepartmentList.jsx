@@ -47,6 +47,17 @@ const DepartmentList = () => {
     fetchDepartments();
   }, []);
 
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this department?")) {
+      try {
+        await axios.delete(`/api/departments/${id}`);
+        fetchDepartments();
+      } catch (err) {
+        setError("Failed to delete department");
+      }
+    }
+  };
+
   return (
     <div className="p-5 bg-gradient-to-b from-purple-500 to-red-500 min-h-screen">
       {loading ? (
