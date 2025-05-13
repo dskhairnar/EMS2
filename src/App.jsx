@@ -37,14 +37,12 @@ function App() {
           element={
             <PrivateRoutes>
               <RoleBaseRoutes requiredRole={["admin"]}>
-                <MainLayout>
-                  <AdminDashboard />
-                </MainLayout>
+                <MainLayout />
               </RoleBaseRoutes>
             </PrivateRoutes>
           }
         >
-          <Route index element={<AdminSummary />} />
+          <Route index element={<AdminDashboard />} />
           <Route path="departments" element={<DepartmentList />} />
           <Route path="add-department" element={<AddDepartment />} />
           <Route path="department/:id" element={<EditDepartment />} />
