@@ -21,7 +21,7 @@ const EmployeePayslips = () => {
     setError(null);
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/employee/payslips",
+        "https://ems-rnvg.onrender.com/api/employee/payslips",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -47,7 +47,7 @@ const EmployeePayslips = () => {
   const handleDownload = async (payslipId) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/employee/payslips/${payslipId}/download`,
+        `https://ems-rnvg.onrender.com/api/employee/payslips/${payslipId}/download`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

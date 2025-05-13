@@ -24,7 +24,7 @@ const EmployeeProfile = () => {
   const fetchProfile = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/employee/profile",
+        "https://ems-rnvg.onrender.com/api/employee/profile",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -55,7 +55,7 @@ const EmployeeProfile = () => {
     e.preventDefault();
     try {
       const response = await axios.put(
-        "http://localhost:5000/api/employee/profile",
+        "https://ems-rnvg.onrender.com/api/employee/profile",
         profile,
         {
           headers: {

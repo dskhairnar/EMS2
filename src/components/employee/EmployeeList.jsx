@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -35,11 +35,7 @@ const EmployeeList = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get("http://localhost:5000/api/employee", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await api.get("/employee");
       if (response.data.success) {
         setEmployees(response.data.employees);
       } else {
@@ -54,11 +50,7 @@ const EmployeeList = () => {
 
   const fetchDepartments = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/department", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await api.get("/department");
       if (response.data.success) {
         setDepartments(response.data.departments);
       }
@@ -68,11 +60,7 @@ const EmployeeList = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/employee/${id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        await api.delete(`/employee/${id}`);
         setEmployees((prev) => prev.filter((emp) => emp._id !== id));
       } catch (err) {
         setError("Failed to delete employee");
@@ -113,17 +101,9 @@ const EmployeeList = () => {
     e.preventDefault();
     try {
       if (editId) {
-        await axios.put(`http://localhost:5000/api/employee/${editId}`, form, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        await api.put(`/employee/${editId}`, form);
       } else {
-        await axios.post("http://localhost:5000/api/employee", form, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        await api.post("/employee", form);
       }
       fetchEmployees();
       handleDialogClose();

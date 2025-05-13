@@ -20,7 +20,7 @@ const LeaveList = () => {
     setError(null);
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/employee/leaves/all",
+        "https://ems-rnvg.onrender.com/api/employee/leaves/all",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -43,7 +43,7 @@ const LeaveList = () => {
   const handleStatusChange = async (leaveId, newStatus) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/employee/leaves/${leaveId}/status`,
+        `https://ems-rnvg.onrender.com/api/employee/leaves/${leaveId}/status`,
         { status: newStatus },
         {
           headers: {

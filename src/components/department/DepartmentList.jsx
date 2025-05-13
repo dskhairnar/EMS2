@@ -17,7 +17,7 @@ const DepartmentList = () => {
       setLoading(true);
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/department",
+          "https://ems-rnvg.onrender.com/api/department",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -52,11 +52,14 @@ const DepartmentList = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this department?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/department/${id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        await axios.delete(
+          `https://ems-rnvg.onrender.com/api/department/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
         // Refresh the list after deletion
         setDepartments((prev) => prev.filter((dep) => dep._id !== id));
       } catch (err) {
@@ -84,8 +87,8 @@ const DepartmentList = () => {
             />
             <Button asChild>
               <Link to="/admin-dashboard/add-department">
-              Add New Department
-            </Link>
+                Add New Department
+              </Link>
             </Button>
           </div>
 
@@ -116,7 +119,7 @@ const DepartmentList = () => {
                         colSpan={3}
                         className="text-center py-8 text-gray-400"
                       >
-                  No departments available
+                        No departments available
                       </td>
                     </tr>
                   ) : (
@@ -151,15 +154,15 @@ const DepartmentList = () => {
                             >
                               Delete
                             </Button>
-                </div>
+                          </div>
                         </td>
                       </tr>
                     ))
                   )}
                 </tbody>
               </table>
-          </div>
-      )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

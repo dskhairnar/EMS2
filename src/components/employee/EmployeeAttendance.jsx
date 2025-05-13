@@ -16,7 +16,7 @@ const EmployeeAttendance = () => {
   const fetchAttendance = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/employee/attendance",
+        "https://ems-rnvg.onrender.com/api/employee/attendance",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -40,7 +40,7 @@ const EmployeeAttendance = () => {
   const checkTodayStatus = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/employee/attendance/today",
+        "https://ems-rnvg.onrender.com/api/employee/attendance/today",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -58,7 +58,7 @@ const EmployeeAttendance = () => {
   const markAttendance = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/employee/attendance/mark",
+        "https://ems-rnvg.onrender.com/api/employee/attendance/mark",
         {},
         {
           headers: {

@@ -21,7 +21,7 @@ const EmployeeLeaves = () => {
   const fetchLeaves = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/employee/leaves",
+        "https://ems-rnvg.onrender.com/api/employee/leaves",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -51,7 +51,7 @@ const EmployeeLeaves = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/employee/leaves",
+        "https://ems-rnvg.onrender.com/api/employee/leaves",
         formData,
         {
           headers: {

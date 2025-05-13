@@ -25,7 +25,7 @@ const AttendanceList = () => {
     try {
       // Admin endpoint: get all attendance records
       const response = await axios.get(
-        "http://localhost:5000/api/employee/attendance/all",
+        "https://ems-rnvg.onrender.com/api/employee/attendance/all",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
