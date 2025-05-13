@@ -1,16 +1,18 @@
 import "./index.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboard from "./components/admin/AdminDashboard";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import PrivateRoutes from "./utils/PrivateRoutes";
 import RoleBaseRoutes from "./utils/RoleBaseRoutes";
+import MainLayout from "./components/ui/MainLayout";
 
 // Admin Components
 import AdminSummary from "./components/dashboard/AdminSummary";
 import DepartmentList from "./components/department/DepartmentList";
 import AddDepartment from "./components/department/AddDepartment";
 import EditDepartment from "./components/department/EditDepartment";
+import Reports from "./components/reports/Reports";
 
 // Employee Components
 import EmployeeSummary from "./components/dashboard/EmployeeSummary";
@@ -18,6 +20,9 @@ import EmployeeProfile from "./components/employee/EmployeeProfile";
 import EmployeeAttendance from "./components/employee/EmployeeAttendance";
 import EmployeeLeaves from "./components/employee/EmployeeLeaves";
 import EmployeePayslips from "./components/employee/EmployeePayslips";
+import EmployeeList from "./components/employee/EmployeeList";
+import AttendanceList from "./components/attendance/AttendanceList";
+import LeaveList from "./components/leave/LeaveList";
 
 function App() {
   return (
@@ -32,7 +37,9 @@ function App() {
           element={
             <PrivateRoutes>
               <RoleBaseRoutes requiredRole={["admin"]}>
-                <AdminDashboard />
+                <MainLayout>
+                  <AdminDashboard />
+                </MainLayout>
               </RoleBaseRoutes>
             </PrivateRoutes>
           }
@@ -41,6 +48,10 @@ function App() {
           <Route path="departments" element={<DepartmentList />} />
           <Route path="add-department" element={<AddDepartment />} />
           <Route path="department/:id" element={<EditDepartment />} />
+          <Route path="employees" element={<EmployeeList />} />
+          <Route path="attendance" element={<AttendanceList />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="leaves" element={<LeaveList />} />
         </Route>
 
         {/* Employee Routes */}
@@ -48,7 +59,9 @@ function App() {
           path="/employee-dashboard"
           element={
             <PrivateRoutes>
-              <EmployeeDashboard />
+              <MainLayout>
+                <EmployeeDashboard />
+              </MainLayout>
             </PrivateRoutes>
           }
         >

@@ -1,5 +1,15 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Calendar, Clock, FileText, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const EmployeeSummary = () => {
   const [stats, setStats] = useState({
@@ -15,6 +25,7 @@ const EmployeeSummary = () => {
     },
     recentActivity: [],
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     // TODO: Fetch actual stats from API
@@ -37,110 +48,85 @@ const EmployeeSummary = () => {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">My Dashboard</h1>
-
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Attendance Summary */}
-        <div className="p-6 bg-white rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
-            Attendance Summary
-          </h2>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Present Days</span>
-              <span className="font-semibold text-green-600">
-                {stats.attendance.present}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Absent Days</span>
-              <span className="font-semibold text-red-600">
-                {stats.attendance.absent}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Late Days</span>
-              <span className="font-semibold text-yellow-600">
-                {stats.attendance.late}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Leave Summary */}
-        <div className="p-6 bg-white rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
-            Leave Summary
-          </h2>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Total Leaves</span>
-              <span className="font-semibold">{stats.leaves.total}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Leaves Used</span>
-              <span className="font-semibold text-red-600">
-                {stats.leaves.used}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Leaves Remaining</span>
-              <span className="font-semibold text-green-600">
-                {stats.leaves.remaining}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="p-6 bg-white rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
-            Quick Actions
-          </h2>
-          <div className="space-y-3">
-            <button className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-              Mark Attendance
-            </button>
-            <button className="w-full px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
-              Apply Leave
-            </button>
-            <button className="w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
-              View Payslip
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          Recent Activity
-        </h2>
-        <div className="space-y-4">
-          {stats.recentActivity.map((activity, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-            >
-              <div>
-                <p className="font-medium text-gray-800">{activity.type}</p>
-                <p className="text-sm text-gray-600">{activity.date}</p>
-              </div>
-              <span
-                className={`px-3 py-1 rounded-full text-sm ${
-                  activity.status === "Present" ||
-                  activity.status === "Approved"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                {activity.status}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <Card className="shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-lg font-semibold">Profile</CardTitle>
+          <User className="text-primary-600 dark:text-primary-400" size={32} />
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold">John Doe</div>
+          <CardDescription>Software Engineer</CardDescription>
+          <Button
+            className="mt-4 w-full"
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/employee-dashboard/profile")}
+          >
+            View Profile
+          </Button>
+        </CardContent>
+      </Card>
+      <Card className="shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-lg font-semibold">Attendance</CardTitle>
+          <Clock className="text-primary-600 dark:text-primary-400" size={32} />
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold">98%</div>
+          <CardDescription>This Month</CardDescription>
+          <Button
+            className="mt-4 w-full"
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/employee-dashboard/attendance")}
+          >
+            View History
+          </Button>
+        </CardContent>
+      </Card>
+      <Card className="shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-lg font-semibold">Leave Balance</CardTitle>
+          <Calendar
+            className="text-primary-600 dark:text-primary-400"
+            size={32}
+          />
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold">15</div>
+          <CardDescription>Days Remaining</CardDescription>
+          <Button
+            className="mt-4 w-full"
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/employee-dashboard/leaves")}
+          >
+            Apply Leave
+          </Button>
+        </CardContent>
+      </Card>
+      <Card className="shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-lg font-semibold">Documents</CardTitle>
+          <FileText
+            className="text-primary-600 dark:text-primary-400"
+            size={32}
+          />
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold">5</div>
+          <CardDescription>Active Documents</CardDescription>
+          <Button
+            className="mt-4 w-full"
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/employee-dashboard/payslips")}
+          >
+            View All
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };

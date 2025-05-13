@@ -14,21 +14,33 @@ const EditDepartment = () => {
 
   useEffect(() => {
     fetchDepartment();
+    // eslint-disable-next-line
   }, [id]);
 
   const fetchDepartment = async () => {
-    try {
-      const response = await axios.get(`/api/departments/${id}`);
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/api/department/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
       setFormData({
-        name: response.data.name,
-        description: response.data.description,
+        name: response.data.department?.name || "",
+        description: response.data.department?.description || "",
       });
       setLoading(false);
     } catch (err) {
-      setError("Failed to fetch department details");
-      setLoading(false);
-    }
-  };
+      if (err.response && err.response.status === 404) {
+        setError("Department not found. It may have been deleted.");
+      } else {
+        setError("Failed to fetch department details");
+      }
+        setLoading(false);
+      }
+    };
 
   const handleChange = (e) => {
     setFormData({
@@ -40,11 +52,15 @@ const EditDepartment = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`/api/departments/${id}`, formData);
+      await axios.put(`http://localhost:5000/api/department/${id}`, formData, {
+          headers: { 
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+      });
       navigate("/admin-dashboard/departments");
     } catch (err) {
       setError("Failed to update department");
-    }
+      }
   };
 
   if (loading) return <div>Loading...</div>;
@@ -61,40 +77,40 @@ const EditDepartment = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label
+                <label
             htmlFor="name"
             className="block text-sm font-medium text-gray-700"
-          >
-            Department Name
-          </label>
-          <input
-            type="text"
+                >
+                  Department Name
+                </label>
+                <input
+                  type="text"
             name="name"
             id="name"
             required
-            value={formData.name}
-            onChange={handleChange}
+            value={formData.name || ""}
+                  onChange={handleChange}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
+                />
+              </div>
 
         <div>
-          <label
-            htmlFor="description"
+                <label
+                  htmlFor="description"
             className="block text-sm font-medium text-gray-700"
-          >
-            Description
-          </label>
-          <textarea
-            name="description"
+                >
+                  Description
+                </label>
+                <textarea
+                  name="description"
             id="description"
             rows="4"
             required
-            value={formData.description}
-            onChange={handleChange}
+            value={formData.description || ""}
+                  onChange={handleChange}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           />
-        </div>
+              </div>
 
         <div className="flex justify-end space-x-4">
           <button
@@ -109,7 +125,7 @@ const EditDepartment = () => {
             className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
           >
             Update Department
-          </button>
+              </button>
         </div>
       </form>
     </div>

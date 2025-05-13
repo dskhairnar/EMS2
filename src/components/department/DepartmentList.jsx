@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";  // Use `useNavigate`
-import DataTable from "react-data-table-component";
-import { DepartmentButtons } from "../../utils/DepartmentHelpers";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 const DepartmentList = () => {
   const [departments, setDepartments] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // Correctly use `useNavigate` hook
+  const [search, setSearch] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -29,29 +30,35 @@ const DepartmentList = () => {
           const data = response.data.departments.map((dep) => ({
             _id: dep._id,
             sno: sno++,
-            dep_name: dep.dep_name,
-            action: <DepartmentButtons ID={dep._id} />,
+            name: dep.name,
           }));
           setDepartments(data);
         } else {
           setError("Failed to load departments. Please try again.");
         }
       } catch (error) {
-        console.error("Error fetching departments:", error);
         setError(error.response?.data.error || "An unexpected error occurred.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchDepartments();
   }, []);
+
+  const filteredDepartments = departments.filter((dep) =>
+    (dep.name || "").toLowerCase().includes(search.toLowerCase())
+  );
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this department?")) {
       try {
-        await axios.delete(`/api/departments/${id}`);
-        fetchDepartments();
+        await axios.delete(`http://localhost:5000/api/department/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        // Refresh the list after deletion
+        setDepartments((prev) => prev.filter((dep) => dep._id !== id));
       } catch (err) {
         setError("Failed to delete department");
       }
@@ -59,98 +66,102 @@ const DepartmentList = () => {
   };
 
   return (
-    <div className="p-5 bg-gradient-to-b from-purple-500 to-red-500 min-h-screen">
-      {loading ? (
-        <div className="flex justify-center items-center min-h-screen">
-          <div className="text-white text-2xl">Loading...</div>
-        </div>
-      ) : error ? (
-        <div className="flex justify-center items-center min-h-screen">
-          <div className="text-red-500 text-2xl">{error}</div>
-        </div>
-      ) : (
-        <>
-          <div className="text-center mb-6">
-            <h3 className="text-3xl font-bold text-white">Manage Department</h3>
-          </div>
-          <div className="flex justify-between items-center mb-4">
+    <div className="py-8 px-2 md:px-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <Card className="max-w-4xl mx-auto shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">
+            Manage Departments
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <input
               type="text"
               placeholder="Search by Department Name"
-              className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 mr-2"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400"
             />
-            <Link
-              to="/admin-dashboard/add-department"
-              className="px-4 py-2 bg-white text-purple-600 rounded-lg hover:bg-purple-600 hover:text-white transition duration-300"
-            >
+            <Button asChild>
+              <Link to="/admin-dashboard/add-department">
               Add New Department
             </Link>
+            </Button>
           </div>
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <DataTable
-              columns={[
-                {
-                  name: "S.No",
-                  selector: (row) => row.sno,
-                  sortable: true,
-                  width: "60px", // Width for serial number column
-                },
-                {
-                  name: "Department Name",
-                  selector: (row) => row.dep_name,
-                  sortable: true,
-                  cell: (row) => (
-                    <div className="text-left">{row.dep_name}</div>
-                  ), // Align text to the left
-                  width: "calc(100% - 200px)", // Calculate remaining space for the buttons
-                },
-                {
-                  name: "Action",
-                  selector: (row) => row.action,
-                  button: true,
-                  width: "140px",
-                },
-              ]}
-              data={departments}
-              pagination // Enable pagination if necessary
-              noDataComponent={
-                <div className="text-center text-gray-500">
+
+          {loading ? (
+            <div className="text-center py-10 text-gray-500">Loading...</div>
+          ) : error ? (
+            <div className="text-center py-10 text-red-500">{error}</div>
+          ) : (
+            <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+              <table className="min-w-full bg-white dark:bg-gray-800">
+                <thead>
+                  <tr className="bg-gray-100 dark:bg-gray-700">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">
+                      S.No
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">
+                      Department Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredDepartments.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={3}
+                        className="text-center py-8 text-gray-400"
+                      >
                   No departments available
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredDepartments.map((dep, idx) => (
+                      <tr
+                        key={dep._id}
+                        className={
+                          idx % 2 === 0
+                            ? "bg-white dark:bg-gray-800"
+                            : "bg-gray-50 dark:bg-gray-900"
+                        }
+                      >
+                        <td className="px-4 py-3">{dep.sno}</td>
+                        <td className="px-4 py-3">{dep.name}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() =>
+                                navigate(
+                                  `/admin-dashboard/department/${dep._id}`
+                                )
+                              }
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleDelete(dep._id)}
+                            >
+                              Delete
+                            </Button>
                 </div>
-              }
-              highlightOnHover
-              pointerOnHover
-              customStyles={{
-                table: {
-                  style: {
-                    borderRadius: "8px",
-                    width: "100%",
-                  },
-                },
-                headRow: {
-                  style: {
-                    backgroundColor: "#f3f4f6",
-                    borderBottomColor: "#e5e7eb",
-                    borderBottomWidth: "2px",
-                    minHeight: "56px",
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                  },
-                },
-                rows: {
-                  style: {
-                    minHeight: "48px",
-                    "&:nth-child(odd)": {
-                      backgroundColor: "#f9fafb",
-                    },
-                  },
-                },
-              }}
-              responsive={true}
-            />
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
           </div>
-        </>
       )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

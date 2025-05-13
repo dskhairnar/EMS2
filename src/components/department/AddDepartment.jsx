@@ -20,7 +20,11 @@ const AddDepartment = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("/api/departments", formData);
+      await axios.post("http://localhost:5000/api/department", formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       navigate("/admin-dashboard/departments");
     } catch (err) {
       setError("Failed to create department");
