@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect, useCallback } from "react";
+import api from "@/api";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -11,23 +11,13 @@ const LeaveList = () => {
   const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    fetchLeaves();
-  }, [status]);
-
-  const fetchLeaves = async () => {
+  const fetchLeaves = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(
-        "https://ems-rnvg.onrender.com/api/employee/leaves/all",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          params: { status: status !== "all" ? status : undefined },
-        }
-      );
+      const response = await api.get("/employee/leaves/all", {
+        params: { status: status !== "all" ? status : undefined },
+      });
       if (response.data.success) {
         setLeaves(response.data.leaves);
       } else {
@@ -38,19 +28,17 @@ const LeaveList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [status]);
+
+  useEffect(() => {
+    fetchLeaves();
+  }, [fetchLeaves]);
 
   const handleStatusChange = async (leaveId, newStatus) => {
     try {
-      const response = await axios.put(
-        `https://ems-rnvg.onrender.com/api/employee/leaves/${leaveId}/status`,
-        { status: newStatus },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await api.put(`/employee/leaves/${leaveId}/status`, {
+        status: newStatus,
+      });
       if (response.data.success) {
         fetchLeaves(); // Refresh the list
       }

@@ -65,10 +65,10 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await api.post(
-        "/auth/login",
-        { email: formData.email, password: formData.password }
-      );
+      const response = await api.post("/auth/login", {
+        email: formData.email,
+        password: formData.password,
+      });
 
       if (response.data.success) {
         // Handle remember me
@@ -78,8 +78,8 @@ const Login = () => {
           localStorage.removeItem("rememberedEmail");
         }
 
-        login(response.data.employee);
-        localStorage.setItem("token", response.data.token);
+        // Use the enhanced login function
+        login(response.data.employee, response.data.token);
 
         // Show success message before redirecting
         const successMessage = document.createElement("div");
@@ -90,6 +90,7 @@ const Login = () => {
 
         setTimeout(() => {
           document.body.removeChild(successMessage);
+          // Navigate based on role
           if (response.data.employee.role === "admin") {
             navigate("/admin-dashboard");
           } else {

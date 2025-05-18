@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
+// import { useNavigate } from "react-router-dom";
+import api from "@/api";
 
 const EmployeeProfile = () => {
   const [loading, setLoading] = useState(true);
@@ -18,30 +19,22 @@ const EmployeeProfile = () => {
   const [success, setSuccess] = useState(null);
 
   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get("/employee/profile");
+        if (response.data.success) {
+          setProfile(response.data.employee);
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        setError(error.response?.data?.message || "Failed to fetch profile");
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchProfile();
   }, []);
-
-  const fetchProfile = async () => {
-    try {
-      const response = await axios.get(
-        "https://ems-rnvg.onrender.com/api/employee/profile",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      if (response.data.success) {
-        setProfile(response.data.employee);
-      } else {
-        setError(response.data.message || "Failed to fetch profile data");
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to fetch profile data");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,25 +47,15 @@ const EmployeeProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(
-        "https://ems-rnvg.onrender.com/api/employee/profile",
-        profile,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await api.put("/employee/profile", profile);
       if (response.data.success) {
         setSuccess("Profile updated successfully");
         setIsEditing(false);
         // Clear success message after 3 seconds
         setTimeout(() => setSuccess(null), 3000);
-      } else {
-        setError(response.data.message || "Failed to update profile");
       }
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to update profile");
+    } catch (error) {
+      setError(error.response?.data?.message || "Failed to update profile");
     }
   };
 
@@ -80,6 +63,14 @@ const EmployeeProfile = () => {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-xl text-gray-600">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-xl text-red-600">{error}</div>
       </div>
     );
   }
@@ -188,7 +179,7 @@ const EmployeeProfile = () => {
               <input
                 type="text"
                 name="department"
-                value={profile.department || ""}
+                value={profile.department?.name || ""}
                 disabled
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100"
               />

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import api from "@/api";
 
 const EmployeeAttendance = () => {
   const [attendance, setAttendance] = useState([]);
@@ -9,74 +9,62 @@ const EmployeeAttendance = () => {
   const [success, setSuccess] = useState(null);
 
   useEffect(() => {
+    const fetchAttendance = async () => {
+      try {
+        const response = await api.get("/employee/attendance");
+        if (response.data.success) {
+          setAttendance(response.data.attendance);
+          // Check if today's attendance is already marked
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const todayRecord = response.data.attendance.find(
+            (record) => new Date(record.date).getTime() === today.getTime()
+          );
+          if (todayRecord) {
+            setTodayStatus(todayRecord.status);
+          }
+        }
+      } catch (error) {
+        setError(error.response?.data?.message || "Failed to fetch attendance");
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchAttendance();
-    checkTodayStatus();
   }, []);
 
-  const fetchAttendance = async () => {
+  const handleMarkAttendance = async () => {
     try {
-      const response = await axios.get(
-        "https://ems-rnvg.onrender.com/api/employee/attendance",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      if (response.data.success) {
-        setAttendance(response.data.attendance);
-      } else {
-        setError(response.data.message || "Failed to fetch attendance data");
-      }
-      setLoading(false);
-    } catch (err) {
-      setError(
-        err.response?.data?.message || "Failed to fetch attendance data"
-      );
-      setLoading(false);
-    }
-  };
-
-  const checkTodayStatus = async () => {
-    try {
-      const response = await axios.get(
-        "https://ems-rnvg.onrender.com/api/employee/attendance/today",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      if (response.data.success) {
-        setTodayStatus(response.data.status);
-      }
-    } catch (err) {
-      console.error("Failed to check today's status:", err);
-    }
-  };
-
-  const markAttendance = async () => {
-    try {
-      const response = await axios.post(
-        "https://ems-rnvg.onrender.com/api/employee/attendance/mark",
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await api.post("/employee/attendance/mark");
       if (response.data.success) {
         setTodayStatus("present");
         setSuccess("Attendance marked successfully");
-        fetchAttendance();
+        // Refresh attendance list
+        const attendanceResponse = await api.get("/employee/attendance");
+        if (attendanceResponse.data.success) {
+          setAttendance(attendanceResponse.data.attendance);
+        }
         // Clear success message after 3 seconds
         setTimeout(() => setSuccess(null), 3000);
-      } else {
-        setError(response.data.message || "Failed to mark attendance");
       }
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to mark attendance");
+    } catch (error) {
+      // If attendance is already marked, treat it as a success
+      if (error.response?.status === 400) {
+        setTodayStatus("present");
+        setSuccess("Attendance already marked for today");
+        // Refresh attendance list to ensure UI is in sync
+        const attendanceResponse = await api.get("/employee/attendance");
+        if (attendanceResponse.data.success) {
+          setAttendance(attendanceResponse.data.attendance);
+        }
+      } else {
+        setError(error.response?.data?.message || "Failed to mark attendance");
+      }
+      // Clear messages after 3 seconds
+      setTimeout(() => {
+        setSuccess(null);
+        setError(null);
+      }, 3000);
     }
   };
 
@@ -95,7 +83,7 @@ const EmployeeAttendance = () => {
           <h1 className="text-2xl font-bold text-gray-800">My Attendance</h1>
           {!todayStatus && (
             <button
-              onClick={markAttendance}
+              onClick={handleMarkAttendance}
               className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
             >
               Mark Attendance
@@ -118,7 +106,7 @@ const EmployeeAttendance = () => {
         {/* Today's Status */}
         <div className="mb-6 p-4 bg-gray-50 rounded-lg">
           <h2 className="text-lg font-semibold text-gray-800 mb-2">
-            Today's Status
+            Today&apos;s Status
           </h2>
           <div className="flex items-center">
             <span
@@ -176,7 +164,7 @@ const EmployeeAttendance = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {record.time || "N/A"}
+                        {new Date(record.time).toLocaleTimeString()}
                       </td>
                     </tr>
                   ))

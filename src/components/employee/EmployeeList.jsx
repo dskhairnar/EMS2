@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import api from "../../api";
+import { useEffect, useState } from "react";
+import api from "@/api";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -25,6 +25,7 @@ const EmployeeList = () => {
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState(initialForm);
   const [page, setPage] = useState(1);
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     fetchEmployees();
@@ -32,17 +33,13 @@ const EmployeeList = () => {
   }, []);
 
   const fetchEmployees = async () => {
-    setLoading(true);
-    setError(null);
     try {
       const response = await api.get("/employee");
       if (response.data.success) {
         setEmployees(response.data.employees);
-      } else {
-        setError("Failed to load employees");
       }
-    } catch (err) {
-      setError("Failed to load employees");
+    } catch (error) {
+      setError(error.response?.data.error || "Failed to fetch employees");
     } finally {
       setLoading(false);
     }
@@ -54,16 +51,19 @@ const EmployeeList = () => {
       if (response.data.success) {
         setDepartments(response.data.departments);
       }
-    } catch {}
+    } catch (error) {
+      setError(error.response?.data.error || "Failed to fetch departments");
+    }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
-        await api.delete(`/admin/employee/${id}`);
-        setEmployees((prev) => prev.filter((emp) => emp._id !== id));
-      } catch (err) {
-        setError("Failed to delete employee");
+        await api.delete(`/employee/${id}`);
+        setEmployees(employees.filter((emp) => emp._id !== id));
+        setMessage("Employee deleted successfully");
+      } catch (error) {
+        setError(error.response?.data.error || "Failed to delete employee");
       }
     }
   };
@@ -107,8 +107,8 @@ const EmployeeList = () => {
       }
       fetchEmployees();
       handleDialogClose();
-    } catch (err) {
-      setError("Failed to save employee");
+    } catch (error) {
+      setError(error.response?.data.error || "Failed to save employee");
     }
   };
 

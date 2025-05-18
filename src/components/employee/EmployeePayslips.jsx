@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
+import api from "@/api";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, FileText } from "lucide-react";
@@ -13,45 +13,26 @@ const EmployeePayslips = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
-    fetchPayslips();
-  }, [selectedMonth, selectedYear]);
-
-  const fetchPayslips = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get(
-        "https://ems-rnvg.onrender.com/api/employee/payslips",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          params: {
-            month: selectedMonth,
-            year: selectedYear,
-          },
+    const fetchPayslips = async () => {
+      try {
+        const response = await api.get("/employee/payslips");
+        if (response.data.success) {
+          setPayslips(response.data.payslips);
         }
-      );
-      if (response.data.success) {
-        setPayslips(response.data.payslips);
-      } else {
-        setError("Failed to load payslips");
+      } catch (error) {
+        setError(error.response?.data.error || "Failed to fetch payslips");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to load payslips");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    fetchPayslips();
+  }, []);
 
   const handleDownload = async (payslipId) => {
     try {
-      const response = await axios.get(
-        `https://ems-rnvg.onrender.com/api/employee/payslips/${payslipId}/download`,
+      const response = await api.get(
+        `/employee/payslips/${payslipId}/download`,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
           responseType: "blob",
         }
       );
@@ -70,8 +51,8 @@ const EmployeePayslips = () => {
       // Cleanup
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err) {
-      setError("Failed to download payslip");
+    } catch (error) {
+      setError(error.response?.data.error || "Failed to download payslip");
     }
   };
 

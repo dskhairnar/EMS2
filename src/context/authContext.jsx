@@ -12,19 +12,23 @@ const AuthProvider = ({ children }) => {
       try {
         const token = localStorage.getItem("token");
         if (token) {
-          const response = await api.get("/auth/verify");
+          // Set the token in the API headers
+          api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
+          const response = await api.get("/auth/verify");
           if (response.data.success) {
             setUser(response.data.employee);
           } else {
             setUser(null);
             localStorage.removeItem("token");
+            delete api.defaults.headers.common["Authorization"];
           }
         }
       } catch (error) {
-        console.log(error);
+        console.error("Auth verification error:", error);
         setUser(null);
         localStorage.removeItem("token");
+        delete api.defaults.headers.common["Authorization"];
       } finally {
         setLoading(false);
       }
@@ -33,20 +37,29 @@ const AuthProvider = ({ children }) => {
     verifyUser();
   }, []);
 
-  const login = (newUser) => {
+  const login = (newUser, token) => {
     setUser(newUser);
+    localStorage.setItem("token", token);
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem("token");
+    delete api.defaults.headers.common["Authorization"];
   };
 
-  return (
-    <UserContext.Provider value={{ user, login, logout, loading }}>
-      {children}
-    </UserContext.Provider>
-  );
+  const value = {
+    user,
+    login,
+    logout,
+    loading,
+    isAuthenticated: !!user,
+    isAdmin: user?.role === "admin",
+    isEmployee: user?.role === "employee",
+  };
+
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
 
 export const useAuth = () => useContext(UserContext);

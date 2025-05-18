@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "@/api";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -16,15 +16,7 @@ const DepartmentList = () => {
       setError(null);
       setLoading(true);
       try {
-        const response = await axios.get(
-          "https://ems-rnvg.onrender.com/api/department",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-
+        const response = await api.get("/department");
         if (response.data.success) {
           let sno = 1;
           const data = response.data.departments.map((dep) => ({
@@ -33,8 +25,6 @@ const DepartmentList = () => {
             name: dep.name,
           }));
           setDepartments(data);
-        } else {
-          setError("Failed to load departments. Please try again.");
         }
       } catch (error) {
         setError(error.response?.data.error || "An unexpected error occurred.");
@@ -52,18 +42,10 @@ const DepartmentList = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this department?")) {
       try {
-        await axios.delete(
-          `https://ems-rnvg.onrender.com/api/department/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        // Refresh the list after deletion
+        await api.delete(`/department/${id}`);
         setDepartments((prev) => prev.filter((dep) => dep._id !== id));
-      } catch (err) {
-        setError("Failed to delete department");
+      } catch (error) {
+        setError(error.response?.data.error || "Failed to delete department");
       }
     }
   };

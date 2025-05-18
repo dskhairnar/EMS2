@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import api from "@/api";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -23,22 +23,16 @@ const AttendanceList = () => {
     setLoading(true);
     setError(null);
     try {
-      // Admin endpoint: get all attendance records
-      const response = await axios.get(
-        "https://ems-rnvg.onrender.com/api/employee/attendance/all",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await api.get("/employee/attendance/all");
       if (response.data.success) {
         setAttendance(response.data.attendance);
       } else {
         setError("Failed to load attendance records");
       }
-    } catch (err) {
-      setError("Failed to load attendance records");
+    } catch (error) {
+      setError(
+        error.response?.data.error || "Failed to load attendance records"
+      );
     } finally {
       setLoading(false);
     }

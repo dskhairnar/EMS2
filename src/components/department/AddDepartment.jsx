@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../api";
+import api from "@/api";
 
 const AddDepartment = () => {
   const navigate = useNavigate();
@@ -9,6 +9,7 @@ const AddDepartment = () => {
     description: "",
   });
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -19,11 +20,18 @@ const AddDepartment = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+
     try {
-      await api.post("/department", formData);
-      navigate("/admin-dashboard/departments");
-    } catch (err) {
-      setError("Failed to create department");
+      const response = await api.post("/department", formData);
+      if (response.data.success) {
+        navigate("/admin-dashboard/departments");
+      }
+    } catch (error) {
+      setError(error.response?.data.error || "Failed to create department");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,7 +62,8 @@ const AddDepartment = () => {
             required
             value={formData.name}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            disabled={loading}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100"
           />
         </div>
 
@@ -72,7 +81,8 @@ const AddDepartment = () => {
             required
             value={formData.description}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            disabled={loading}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100"
           />
         </div>
 
@@ -80,15 +90,17 @@ const AddDepartment = () => {
           <button
             type="button"
             onClick={() => navigate("/admin-dashboard/departments")}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            disabled={loading}
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+            disabled={loading}
+            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
           >
-            Create Department
+            {loading ? "Creating..." : "Create Department"}
           </button>
         </div>
       </form>

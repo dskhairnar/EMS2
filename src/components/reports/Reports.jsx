@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import axios from "axios";
+import { useState } from "react";
+import api from "@/api";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileBarChart2, Download } from "lucide-react";
@@ -17,27 +17,14 @@ const Reports = () => {
     try {
       let response;
       if (type === "department") {
-        response = await axios.get(
-          "http://localhost:5000/api/employee/reports/department",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+        response = await api.get("/employee/reports/department");
       } else {
-        response = await axios.get(
-          `http://localhost:5000/api/employee/reports/${type}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-            params: {
-              month: selectedMonth,
-              year: selectedYear,
-            },
-          }
-        );
+        response = await api.get(`/employee/reports/${type}`, {
+          params: {
+            month: selectedMonth,
+            year: selectedYear,
+          },
+        });
       }
 
       if (response.data.success) {
@@ -47,11 +34,11 @@ const Reports = () => {
 
         switch (type) {
           case "attendance":
-            csvContent = generateAttendanceCSV(response.data.report, response.data.period);
+            csvContent = generateAttendanceCSV(response.data.report);
             filename = `attendance_report_${selectedYear}_${selectedMonth}.csv`;
             break;
           case "leave":
-            csvContent = generateLeaveCSV(response.data.report, response.data.period);
+            csvContent = generateLeaveCSV(response.data.report);
             filename = `leave_report_${selectedYear}_${selectedMonth}.csv`;
             break;
           case "department":
@@ -76,7 +63,7 @@ const Reports = () => {
     }
   };
 
-  const generateAttendanceCSV = (report, period) => {
+  const generateAttendanceCSV = (report) => {
     const header = [
       "Employee Name",
       "Email",
@@ -97,10 +84,12 @@ const Reports = () => {
       record.total,
       `${((record.present / record.total) * 100).toFixed(2)}%`,
     ]);
-    return [header, ...rows].map((row) => row.map((v) => `"${v}"`).join(",")).join("\n");
+    return [header, ...rows]
+      .map((row) => row.map((v) => `"${v}"`).join(","))
+      .join("\n");
   };
 
-  const generateLeaveCSV = (report, period) => {
+  const generateLeaveCSV = (report) => {
     const header = [
       "Employee Name",
       "Email",
@@ -119,7 +108,9 @@ const Reports = () => {
       record.rejected,
       record.total,
     ]);
-    return [header, ...rows].map((row) => row.map((v) => `"${v}"`).join(",")).join("\n");
+    return [header, ...rows]
+      .map((row) => row.map((v) => `"${v}"`).join(","))
+      .join("\n");
   };
 
   const generateDepartmentCSV = (report) => {
@@ -131,7 +122,9 @@ const Reports = () => {
         .map(([pos, count]) => `${pos}: ${count}`)
         .join(", "),
     ]);
-    return [header, ...rows].map((row) => row.map((v) => `"${v}"`).join(",")).join("\n");
+    return [header, ...rows]
+      .map((row) => row.map((v) => `"${v}"`).join(","))
+      .join("\n");
   };
 
   return (
