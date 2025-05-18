@@ -60,7 +60,7 @@ const EmployeeList = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
-        await api.delete(`/employee/${id}`);
+        await api.delete(`/admin/employee/${id}`);
         setEmployees((prev) => prev.filter((emp) => emp._id !== id));
       } catch (err) {
         setError("Failed to delete employee");
